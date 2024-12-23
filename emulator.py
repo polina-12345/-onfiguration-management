@@ -8,6 +8,7 @@ import platform
 import shutil
 import calendar
 from datetime import datetime
+import tempfile
 
 
 class ShellEmulator:
@@ -31,6 +32,8 @@ class ShellEmulator:
         self.entry.pack(padx=10, pady=10, fill=tk.X)
         self.entry.bind("<Return>", self.execute_command)
 
+        # Создание временной директории для распаковки файловой системы
+        self.temp_dir = tempfile.mkdtemp()
         self.extract_virtual_fs()
 
     @staticmethod
@@ -51,7 +54,7 @@ class ShellEmulator:
             return
 
         with tarfile.open(self.virtual_fs_path) as tar:
-            tar.extractall(path="virtual_fs", filter=tarfile.data_filter)
+            tar.extractall(path=self.temp_dir)
 
     def execute_command(self, event):
         command = self.entry.get()
@@ -80,7 +83,7 @@ class ShellEmulator:
 
     def list_files(self):
         try:
-            files = os.listdir(f"virtual_fs{self.current_path}")
+            files = os.listdir(os.path.join(self.temp_dir, self.current_path.lstrip('/')))
             output = "\n".join(files) if files else "Пустая директория\n"
             self.text_area.insert(tk.END, f"{output}\n")
         except FileNotFoundError:
@@ -94,9 +97,9 @@ class ShellEmulator:
                 self.current_path = "/".join(parts) or "/"
             return
 
-        new_path = os.path.join(f"virtual_fs{self.current_path}", path)
+        new_path = os.path.join(self.temp_dir, self.current_path.lstrip('/'), path)
         if os.path.isdir(new_path):
-            self.current_path = new_path.replace("virtual_fs", "")
+            self.current_path = os.path.relpath(new_path, start=self.temp_dir)
         else:
             self.text_area.insert(tk.END, "Директория не найдена\n")
 
@@ -112,8 +115,8 @@ class ShellEmulator:
     def copy_file(self, args):
         try:
             src, dest = args.split()
-            src_path = os.path.join(f"virtual_fs{self.current_path}", src)
-            dest_path = os.path.join(f"virtual_fs{self.current_path}", dest)
+            src_path = os.path.join(self.temp_dir, self.current_path.lstrip('/'), src)
+            dest_path = os.path.join(self.temp_dir, self.current_path.lstrip('/'), dest)
 
             if os.path.isdir(src_path):
                 shutil.copytree(src_path, dest_path)
