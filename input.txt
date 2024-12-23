@@ -1,0 +1,7 @@
+// Это однострочный комментарий
+var myNumber := 42
+var myString := "Hello, world"
+var myArray := #(1, 2, 3, "four")
+var myDict := {key1 => "value1", key2 => 123, key3 => #(5, 6, 7)}
+
+{constNumber => ![myNumber],constString => ![myString],nestedArray => ![myArray],nestedDict => ![myDict],additional => {name => "example",value => 10}}
