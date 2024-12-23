@@ -40,3 +40,8 @@ emulator.py                  # файл с программой
 ```bash
 py emulator.py virtual_fs.tar     # py название файла <файл с образом файловой системы>
 ```
+
+# Unittest
+```bash
+py -m unittest unttests.py
+```
